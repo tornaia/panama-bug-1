@@ -1,0 +1,65 @@
+c:\workspace\panama-bug>java --version
+openjdk 16-panama 2021-03-16
+OpenJDK Runtime Environment (build 16-panama+2-193)
+OpenJDK 64-Bit Server VM (build 16-panama+2-193, mixed mode, sharing)
+
+c:\workspace\panama-bug>
+c:\workspace\panama-bug>jextract --source -C "--verbose" -d src\main\java "pbug.h"
+WARNING: Using incubator modules: jdk.incubator.jextract, jdk.incubator.foreign
+clang version 9.0.0 (tags/RELEASE_900/final)
+Target: x86_64-pc-windows-msvc
+Thread model: posix
+InstalledDir:
+ignoring nonexistent directory "lib\clang\9.0.0\include"
+#include "..." search starts here:
+#include <...> search starts here:
+ C:\Program Files\Java\jdk-16\conf\jextract
+ C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Tools\MSVC\14.28.29304\include
+ C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt
+ C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\shared
+ C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\um
+ C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\winrt
+End of search list.
+clang version 9.0.0 (tags/RELEASE_900/final)
+Target: x86_64-pc-windows-msvc
+Thread model: posix
+InstalledDir:
+#include "..." search starts here:
+#include <...> search starts here:
+ C:\Program Files\Java\jdk-16\conf\jextract
+End of search list.
+#include "..." search starts here:
+#include <...> search starts here:
+ C:\Program Files\Java\jdk-16\conf\jextract
+End of search list.
+#include "..." search starts here:
+#include <...> search starts here:
+ C:\Program Files\Java\jdk-16\conf\jextract
+End of search list.
+
+c:\workspace\panama-bug>
+c:\workspace\panama-bug>rd /s /q target
+
+c:\workspace\panama-bug>mkdir target\classes
+
+c:\workspace\panama-bug>
+c:\workspace\panama-bug>javac --source 16 --add-modules jdk.incubator.foreign -d target\classes src\main\java\*.java
+warning: using incubating module(s): jdk.incubator.foreign
+1 warning
+
+c:\workspace\panama-bug>
+c:\workspace\panama-bug>java -classpath target\classes --enable-preview --add-modules jdk.incubator.foreign -Dforeign.restricted=permit PBugApp
+WARNING: Using incubator modules: jdk.incubator.foreign
+Exception in thread "main" java.lang.ExceptionInInitializerError
+        at pbug_h$PARAMS.$LAYOUT(pbug_h.java:15)
+        at pbug_h$PARAMS.allocate(pbug_h.java:193)
+        at PBugApp.main(PBugApp.java:4)
+Caused by: java.lang.IllegalArgumentException: Bad layout path: cannot resolve 'flags2' in layout [b32(flags3)[layout/name=flags3]]
+        at jdk.incubator.foreign/jdk.internal.foreign.LayoutPath.badLayoutPath(LayoutPath.java:243)
+        at jdk.incubator.foreign/jdk.internal.foreign.LayoutPath.groupElement(LayoutPath.java:139)
+        at jdk.incubator.foreign/jdk.incubator.foreign.MemoryLayout$PathElement.lambda$groupElement$0(MemoryLayout.java:494)
+        at jdk.incubator.foreign/jdk.internal.foreign.LayoutPath$PathElementImpl.apply(LayoutPath.java:308)
+        at jdk.incubator.foreign/jdk.incubator.foreign.MemoryLayout.computePathOp(MemoryLayout.java:448)
+        at jdk.incubator.foreign/jdk.incubator.foreign.MemoryLayout.varHandle(MemoryLayout.java:406)
+        at pbug_h$constants$0.<clinit>(pbug_h$constants$0.java:83)
+        ... 3 more
